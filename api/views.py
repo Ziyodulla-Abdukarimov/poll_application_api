@@ -1,5 +1,6 @@
 from rest_framework.generics import ListAPIView, CreateAPIView
-from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -32,16 +33,19 @@ class LoginView(APIView):
 
 # Create your views here.
 class Polls(ListAPIView):
+    permission_classes = [AllowAny]
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
 
 
 class Choice(ListAPIView):
+    permission_classes = [AllowAny]
     queryset = Choice.objects.all()
     serializer_class = ChoiceSerializer
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def vote_views(request):
     question_id = request.data.get('question_id')
     user_id = request.user.id
