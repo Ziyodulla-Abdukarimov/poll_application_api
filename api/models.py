@@ -29,11 +29,19 @@ class Vote(models.Model):
         return self.question.question_text + " " + self.vote_author.last_name
 
     @staticmethod
+    def check_vote(question_id, user_id, choice_id):
+        if Vote.objects.filter(question=question_id, vote_author=user_id, choice=choice_id).exists():
+            return True
+
+    @staticmethod
     def poll_vote(question_id, user_id, choice_id):
+        choice = Choice.objects.get(id=choice_id)
         vote = Vote(
             question=Question.objects.get(id=question_id),
             vote_author=User.objects.get(id=user_id),
-            choice=Choice.objects.get(id=choice_id)
+            choice=choice
         )
         vote.save()
+        choice.votes += 1
+        choice.save()
         return vote

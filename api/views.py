@@ -23,6 +23,11 @@ def vote_views(request):
     user_id = request.user.id
     choice_id = request.data.get('choice_id')
 
+    check = Vote.check_vote(question_id, user_id, choice_id)
+    if check:
+        return Response({
+            "message": "Siz ovoz bergansiz!"
+        }, status=200)
     vote = Vote.poll_vote(question_id, user_id, choice_id)
 
     return Response({
@@ -31,4 +36,4 @@ def vote_views(request):
         'author': vote.vote_author.username,
         'choice': vote.choice.choice_text,
         'created_date': vote.created_date
-    })
+    }, status=201)
