@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import *
+from model.models import *
 from rest_framework.authtoken.models import Token
 
 
@@ -9,9 +9,15 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ChoiceSerializer(serializers.ModelSerializer):
+class OneChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choice
+        fields = '__all__'
+
+
+class MultiChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MultiChoice
         fields = '__all__'
 
 

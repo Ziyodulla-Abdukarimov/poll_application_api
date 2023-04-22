@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
     # my apps
     'api.apps.ApiConfig',
+    'model.apps.ModelConfig',
 
     # local apps
     'rest_framework',

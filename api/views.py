@@ -1,13 +1,13 @@
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
 from django.contrib.auth import authenticate
-from .models import *
 from .serializers import *
+from model.models import *
 
 
 class UserCreate(CreateAPIView):
@@ -41,7 +41,7 @@ class Polls(ListAPIView):
 class Choice(ListAPIView):
     permission_classes = [AllowAny]
     queryset = Choice.objects.all()
-    serializer_class = ChoiceSerializer
+    serializer_class = OneChoiceSerializer
 
 
 @api_view(['POST'])
@@ -49,19 +49,37 @@ class Choice(ListAPIView):
 def vote_views(request):
     question_id = request.data.get('question_id')
     user_id = request.user.id
-    choice_id = request.data.get('choice_id')
-
-    check = Vote.check_vote(question_id, user_id, choice_id)
-    if check:
+    if Question.objects.get(id=question_id).choice_type == 'one':
+        choice_id = request.data.get('choice')
+        check = OneChoice.check_vote(question_id, user_id)
+        if check:
+            return Response({
+                "message": "Siz ovoz bergansiz!"
+            }, status=200)
+        vote = OneChoice.poll_vote(question_id, user_id, choice_id)
         return Response({
-            "message": "Siz ovoz bergansiz!"
-        }, status=200)
-    vote = Vote.poll_vote(question_id, user_id, choice_id)
+            'id': vote.id,
+            'question': vote.question.question_text,
+            'author': vote.vote_author.username,
+            'choice': vote.choice.choice_text,
+            'created_date': vote.created_date
+        }, status=201)
 
-    return Response({
-        'id': vote.id,
-        'question': vote.question.question_text,
-        'author': vote.vote_author.username,
-        'choice': vote.choice.choice_text,
-        'created_date': vote.created_date
-    }, status=201)
+    elif Question.objects.get(id=question_id).choice_type == 'multi':
+        selected_choices = request.data.get('choice', [])
+        check = MultiChoice.check_vote(question_id, user_id)
+        if check:
+            return Response({
+                "message": "Siz ovoz bergansiz!"
+            }, status=200)
+        if not selected_choices:
+            raise ValidationError('Siz hechnima belgilamadingiz!')
+        selected_choice_ids = [choice['id'] for choice in selected_choices]
+        vote = MultiChoice.poll_vote(question_id, user_id, selected_choice_ids)
+        return Response({
+            'id': vote.id,
+            'question': vote.question.question_text,
+            'author': vote.vote_author.username,
+            'choice': [choice.choice_text for choice in vote.choice.all()],
+            'created_date': vote.created_date
+        }, status=201)

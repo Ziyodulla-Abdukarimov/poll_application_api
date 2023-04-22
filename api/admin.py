@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Question, Choice, Vote
+from model.models import Question, Choice, OneChoice, MultiChoice
 
 
 # Register your models here.
@@ -14,4 +14,5 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Question, QuestionAdmin)
-admin.site.register(Vote)
+admin.site.register(OneChoice)
+admin.site.register(MultiChoice)
