@@ -1,5 +1,5 @@
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
@@ -49,7 +49,8 @@ class Choice(ListAPIView):
 def vote_views(request):
     question_id = request.data.get('question_id')
     user_id = request.user.id
-    if Question.objects.get(id=question_id).choice_type == 'one':
+    question = get_object_or_404(Question, id=question_id)
+    if question.choice_type == 'one':
         choice_id = request.data.get('choice')
         check = OneChoice.check_vote(question_id, user_id)
         if check:
@@ -65,7 +66,7 @@ def vote_views(request):
             'created_date': vote.created_date
         }, status=201)
 
-    elif Question.objects.get(id=question_id).choice_type == 'multi':
+    elif question.choice_type == 'multi':
         selected_choices = request.data.get('choice', [])
         check = MultiChoice.check_vote(question_id, user_id)
         if check:
