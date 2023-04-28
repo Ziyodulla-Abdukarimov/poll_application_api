@@ -3,6 +3,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.contrib import admin
 from django.urls import path, include, re_path
+import client
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -20,6 +21,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('api.urls')),
+    path('api/v1/client/', include('client.client_url')),
     path('api-auth/', include('rest_framework.urls')),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

@@ -5,16 +5,27 @@ ONE_CHOICE, MULTI_CHOICE = (
     'one',
     'multi'
 )
+ADMIN, CLIENT = (
+    'admin',
+    'client'
+)
 
 
 # Create your models here.
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
 
+    CREATOR_TYPE = (
+        (ADMIN, ADMIN),
+        (CLIENT, CLIENT)
+    )
+
     CHOICE_TYPE = (
         (ONE_CHOICE, ONE_CHOICE),
         (MULTI_CHOICE, MULTI_CHOICE)
     )
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    creator_type = models.CharField(choices=CREATOR_TYPE, max_length=100)
     choice_type = models.CharField(choices=CHOICE_TYPE, max_length=15)
 
     def __str__(self):
@@ -22,7 +33,7 @@ class Question(models.Model):
 
 
 class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
     choice_text = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
 
